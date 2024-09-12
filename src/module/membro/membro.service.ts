@@ -43,7 +43,7 @@ export class MembroService {
         data: {
           id: randomUUID(),
           email,
-          senha,
+          senha: hashedPassword,
           nome
         }
       })
@@ -76,7 +76,7 @@ export class MembroService {
   async updateMembro(id: string, updateMembroDTO: UpdateMembroDTO): Promise<Membro> {
     return this.prismaService.$transaction(async (prisma) => {
       await this.findMembroById(id)
-
+      
       const { email, nome, senha } = updateMembroDTO
 
       const data: { [key: string]: any } = {}
