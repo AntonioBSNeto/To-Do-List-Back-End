@@ -30,7 +30,7 @@ model Tarefa {
   finalizada      Boolean
   dataFinalizada  DateTime?
   prioridade      Prioridade  @default(BAIXA)
-  membro          Membro @relation(fields: [membroId], references: [id])
+  membro          Membro @relation(fields: [membroId], references: [id], onDelete: Cascade)
   membroId        String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
