@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { MembroService } from "./membro.service";
 import { MembroDTO } from "./dto/membro.dto";
 import { MembroSemSenha } from "./util/membroSemSenha";
 import { UpdateMembroDTO } from "./dto/update-membro.dto";
+import { AuthGuard } from "../auth/auth.guard";
 
+@UseGuards(AuthGuard)
 @ApiTags('Membro')
 @Controller('membro')
 export class MembroController {
@@ -44,16 +46,16 @@ export class MembroController {
     type: UpdateMembroDTO,
     description: 'Json structure for updating membro object',
   })
-  update(@Param('id') id: string, @Body() updateMembroDTO: UpdateMembroDTO) {
-    return this.membroService.updateMembro(id, updateMembroDTO);
+  update(@Req() request, @Param('id') id: string, @Body() updateMembroDTO: UpdateMembroDTO) {
+    return this.membroService.updateMembro(id, updateMembroDTO, request);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a membro' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the membro' })
   @ApiResponse({ status: 200, description: 'The membro has been successfully deleted.' })
-  delete(@Param('id') id: string) {
-    return this.membroService.deleteMembro(id);
+  delete(@Req() request, @Param('id') id: string) {
+    return this.membroService.deleteMembro(id, request);
   }
 
 }
