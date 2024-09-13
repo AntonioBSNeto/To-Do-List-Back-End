@@ -6,7 +6,6 @@ import { MembroSemSenha } from "./util/membroSemSenha";
 import { UpdateMembroDTO } from "./dto/update-membro.dto";
 import { AuthGuard } from "../auth/auth.guard";
 
-@UseGuards(AuthGuard)
 @ApiTags('Membro')
 @Controller('membro')
 export class MembroController {
@@ -23,6 +22,7 @@ export class MembroController {
     return this.membroService.create(body)
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get all membros' })
   @ApiResponse({ status: 200, description: 'Returns all membros.' })
@@ -30,6 +30,7 @@ export class MembroController {
     return this.membroService.findAll();
   }
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Find membro by ID' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the membro' })
@@ -38,6 +39,7 @@ export class MembroController {
     return this.membroService.findOne(id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a membro' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the membro' })
@@ -50,6 +52,7 @@ export class MembroController {
     return this.membroService.updateMembro(id, updateMembroDTO, request);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a membro' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the membro' })
