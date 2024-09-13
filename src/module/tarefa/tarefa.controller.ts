@@ -1,10 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { TarefaService } from "./tarefa.service";
 import { TarefaDTO } from "./dto/tarefa.dto";
 import { Tarefa } from "@prisma/client";
 import { UpdateTarefaDTO } from "./dto/tarefa-update.dto";
+import { AuthGuard } from "../auth/auth.guard";
 
+
+@UseGuards(AuthGuard)
 @ApiTags('Tarefa')
 @Controller('tarefa')
 export class TarefaController {
@@ -52,16 +55,16 @@ export class TarefaController {
     type: UpdateTarefaDTO,
     description: 'Json structure for updating tarefa object',
   })
-  update(@Param('id') id: string, @Body() updateTarefaDTO: UpdateTarefaDTO) {
-    return this.tarefaServie.updateTarefa(id, updateTarefaDTO);
+  update(@Req() request, @Param('id') id: string, @Body() updateTarefaDTO: UpdateTarefaDTO) {
+    return this.tarefaServie.updateTarefa(id, updateTarefaDTO, request);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a tarefa' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the tarefa' })
   @ApiResponse({ status: 200, description: 'The tarefa has been successfully deleted.' })
-  delete(@Param('id') id: string) {
-    return this.tarefaServie.deleteTarefa(id);
+  delete(@Req() request, @Param('id') id: string) {
+    return this.tarefaServie.deleteTarefa(id, request);
   }
 
 }

@@ -1,9 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Membro, Tarefa } from "@prisma/client";
 import { PrismaService } from "src/database/prisma.service";
 import { TarefaDTO } from "./dto/tarefa.dto";
 import { UpdateTarefaDTO } from "./dto/tarefa-update.dto";
-import { MembroSemSenha } from "../membro/util/membroSemSenha";
+import { Request } from 'express';
 
 @Injectable()
 export class TarefaService {
@@ -46,9 +46,13 @@ export class TarefaService {
     return await this.prismaService.tarefa.findMany({ where: { membroId } });
   }
 
-  async updateTarefa(id: string, updateTarefaDTO: UpdateTarefaDTO): Promise<Tarefa> {
+  async updateTarefa(id: string, updateTarefaDTO: UpdateTarefaDTO, request: any): Promise<Tarefa> {
     return this.prismaService.$transaction(async (prisma) => {
       const tarefa = await this.findTarefaById(id)
+
+      if (tarefa.id !== request.user.userId) {
+        throw new ForbiddenException('Access Denied: You do not have permission to modify this task')
+      }
 
       if (tarefa.finalizada) {
         throw new ConflictException('The Tarefa has already been completed and cannot be updated.')
@@ -70,8 +74,12 @@ export class TarefaService {
     })
   }
 
-  async deleteTarefa(id: string): Promise<Tarefa> {
-    await this.findTarefaById(id)
+  async deleteTarefa(id: string, request: any): Promise<Tarefa> {
+    const tarefa = await this.findTarefaById(id)
+
+    if (tarefa.id !== request.user.userId) {
+      throw new ForbiddenException('Access Denied: You do not have permission to modify this task')
+    }
 
     return await this.prismaService.tarefa.delete({
       where: { id }

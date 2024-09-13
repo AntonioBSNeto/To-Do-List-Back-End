@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/database/prisma.service";
 import { MembroDTO } from "./dto/membro.dto";
 import { Membro } from "@prisma/client";
@@ -73,9 +73,13 @@ export class MembroService {
     return await this.prismaService.membro.findUnique({ where: { email } })
   }
 
-  async updateMembro(id: string, updateMembroDTO: UpdateMembroDTO): Promise<Membro> {
+  async updateMembro(id: string, updateMembroDTO: UpdateMembroDTO, request: any): Promise<Membro> {
     return this.prismaService.$transaction(async (prisma) => {
       await this.findMembroById(id)
+
+      if (id !== request.user.userId) {
+        throw new ForbiddenException('Access Denied: You do not have permission to modify this task')
+      }
       
       const { email, nome, senha } = updateMembroDTO
 
@@ -91,8 +95,12 @@ export class MembroService {
     })
   }
 
-  async deleteMembro(id: string): Promise<Membro> {
+  async deleteMembro(id: string, request: any): Promise<Membro> {
     await this.findMembroById(id)
+
+    if (id !== request.user.userId) {
+      throw new ForbiddenException('Access Denied: You do not have permission to modify this task')
+    }
 
     return await this.prismaService.membro.delete({
       where: { id }
