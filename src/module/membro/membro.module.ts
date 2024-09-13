@@ -5,6 +5,7 @@ import { MembroService } from "./membro.service";
 
 @Module({
   controllers: [MembroController],
-  providers: [MembroService, PrismaService]
+  providers: [MembroService, PrismaService],
+  exports: [MembroService]
 })
 export class MembroModule {}
