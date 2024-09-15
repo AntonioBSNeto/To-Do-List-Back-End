@@ -50,7 +50,7 @@ export class TarefaService {
     return this.prismaService.$transaction(async (prisma) => {
       const tarefa = await this.findTarefaById(id)
 
-      if (tarefa.id !== request.user.userId) {
+      if (tarefa.membroId !== request.user.userId) {
         throw new ForbiddenException('Access Denied: You do not have permission to modify this task')
       }
 
@@ -58,9 +58,15 @@ export class TarefaService {
         throw new ConflictException('The Tarefa has already been completed and cannot be updated.')
       }
 
+      
       const { nome, descricao, finalizada, membroId, prioridade } = updateTarefaDTO
 
       const data: { [key: string]: any } = {}
+
+      if (!tarefa.finalizada && updateTarefaDTO.finalizada) {
+        updateTarefaDTO.dataFinalizada = new Date()
+      }
+
       if (updateTarefaDTO.descricao !== undefined) data.descricao = descricao
       if (updateTarefaDTO.nome !== undefined) data.nome = nome
       if (updateTarefaDTO.finalizada !== undefined) data.finalizada = finalizada
@@ -74,10 +80,14 @@ export class TarefaService {
     })
   }
 
-  async deleteTarefa(id: string, request: any): Promise<Tarefa> {
+  async deleteTarefa(id: string, request: any): Promise<any> {
     const tarefa = await this.findTarefaById(id)
 
-    if (tarefa.id !== request.user.userId) {
+    if (tarefa.membroId !== request.user.userId) {
+      return {
+        tarefa,
+        user: request?.user
+      }
       throw new ForbiddenException('Access Denied: You do not have permission to modify this task')
     }
 

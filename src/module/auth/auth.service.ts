@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { MembroService } from "../membro/membro.service";
 import { JwtService } from "@nestjs/jwt";
 import { compare } from 'bcrypt';
@@ -8,10 +8,13 @@ export class AuthService {
   constructor(
     private membroService: MembroService,
     private jwtService: JwtService
-  ) {}
+  ) { }
 
   async signIn(email: string, pass: string): Promise<{ access_token: string, refresh_token: string }> {
     const user = await this.membroService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException();
+    }
     const isPasswordMatching = await compare(pass, user.senha);
     if (!isPasswordMatching) {
       throw new UnauthorizedException();
@@ -28,9 +31,9 @@ export class AuthService {
       },
     );
 
-    const accessToken  = this.jwtService.sign({ userId: id, email })
+    const accessToken = this.jwtService.sign({ userId: id, email })
 
-    return { access_token: accessToken, refresh_token: refreshToken };
+    return { access_token: accessToken, refresh_token: refreshToken, userId: id };
   }
 
   async refreshToken(refreshToken: string) {
